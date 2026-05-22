@@ -3,8 +3,7 @@ import pandas as pd
 import datetime
 import os
 
-# 1. IZMJENA: Naziv aplikacije i ikona za mobitele
-st.set_page_config(page_title="Obitelj", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Automatski Obiteljski Budžet", layout="wide")
 
 # --- PUTANJA ZA INTERNET (Sprema se u istu mapu na cloudu) ---
 PUTANJA_BAZE = "obiteljski_budzet.csv"
@@ -125,14 +124,13 @@ if stranica == "Unos i Trenutno Stanje":
             iznos_tekst = st.text_input("Iznos u EUR (npr. 50 ili 12.50):", value="0")
         with col2:
             stalan_prihod = False
-            # 2. IZMJENA: Dodane ikone u kategorije unosa
             if tip == "Trošak":
-                kat = st.selectbox("Kategorija troška", ["🛒 Hrana", "⚡ Režije", "🚗 Prijevoz", "🎬 Zabava", "🏠 Kredit/Stan", "📦 Ostalo"])
+                kat = st.selectbox("Kategorija troška", ["Hrana", "Režije", "Prijevoz", "Zabava", "Kredit/Stan", "Ostalo"])
             elif tip == "Prihod":
-                kat = st.selectbox("Kategorija prihoda", ["💼 Plaća 1", "💼 Plaća 2", "🔑 Najam", "➕ Dodatno"])
+                kat = st.selectbox("Kategorija prihoda", ["Plaća 1", "Plaća 2", "Najam", "Dodatno"])
                 stalan_prihod = st.checkbox("🔄 Ovo je stalan mjesečni prihod (ponavlja se)")
             else:
-                kat = st.selectbox("Kategorija štednje", ["🚨 Hitni fond", "✈️ Putovanja", "📈 Dugoročna štednja"])
+                kat = st.selectbox("Kategorija štednje", ["Hitni fond", "Putovanja", "Dugoročna štednja"])
                
             datum_unosa = st.date_input("Datum transakcije", datetime.date.today())
             opis = st.text_input("Opis / Napomena")
@@ -170,7 +168,7 @@ if stranica == "Unos i Trenutno Stanje":
             
             orig_idx = originalni_idx_lista if originalni_idx_lista else indeks
             
-            # POPRAVAK: Vraćen točan omjer stupaca [4, 1] da se aplikacija ne ruši
+            # ISPRAVLJENO: Dodan omjer [4, 1] iz izvorne stabilne verzije
             kol_podaci, col_gumb = st.columns([4, 1])
             with kol_podaci:
                 oznaka_stalnog = "🔄 [STALNI] " if red["Stalan"] else ""
@@ -207,3 +205,7 @@ elif stranica == "Detaljna Statistika":
                 po_kat_t = df_trosak.groupby("Kategorija")["Iznos (EUR)"].sum()
                 st.bar_chart(po_kat_t)
             else:
+                st.info("Nema troškova.")
+        with g2:
+            st.write("### 🟢 Prihodi ovog mjeseca")
+            df_prihod = df_mjesec[df_mjesec["Tip"] == "Prihod"]
