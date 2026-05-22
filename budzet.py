@@ -3,10 +3,10 @@ import pandas as pd
 import datetime
 import os
 
-# Popravljeno: Kraći naziv i ikona za mobitele
+# 1. IZMJENA: Naziv aplikacije i ikona za mobitele
 st.set_page_config(page_title="Obitelj", page_icon="📊", layout="wide")
 
-# --- PUTANJA ZA INTERNET ---
+# --- PUTANJA ZA INTERNET (Sprema se u istu mapu na cloudu) ---
 PUTANJA_BAZE = "obiteljski_budzet.csv"
 
 def ucitaj_podatke():
@@ -125,7 +125,7 @@ if stranica == "Unos i Trenutno Stanje":
             iznos_tekst = st.text_input("Iznos u EUR (npr. 50 ili 12.50):", value="0")
         with col2:
             stalan_prihod = False
-            # Dodane ikone u kategorije
+            # 2. IZMJENA: Dodane ikone u kategorije unosa
             if tip == "Trošak":
                 kat = st.selectbox("Kategorija troška", ["🛒 Hrana", "⚡ Režije", "🚗 Prijevoz", "🎬 Zabava", "🏠 Kredit/Stan", "📦 Ostalo"])
             elif tip == "Prihod":
@@ -170,7 +170,7 @@ if stranica == "Unos i Trenutno Stanje":
             
             orig_idx = originalni_idx_lista if originalni_idx_lista else indeks
             
-            # Popravljeno: Točan raspored stupaca (4 naprema 1) iz vaše stabilne verzije
+            # POPRAVAK: Vraćen točan omjer stupaca [4, 1] da se aplikacija ne ruši
             kol_podaci, col_gumb = st.columns([4, 1])
             with kol_podaci:
                 oznaka_stalnog = "🔄 [STALNI] " if red["Stalan"] else ""
@@ -207,5 +207,3 @@ elif stranica == "Detaljna Statistika":
                 po_kat_t = df_trosak.groupby("Kategorija")["Iznos (EUR)"].sum()
                 st.bar_chart(po_kat_t)
             else:
-                st.info("Nema troškova.")
-        with g2:
