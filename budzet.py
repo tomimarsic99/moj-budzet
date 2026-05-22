@@ -84,6 +84,7 @@ if not df_sve.empty:
 # --- FILTRIRANJE PODATAKA ---
 if not df_sve.empty:
     df_sve["Privremeni_Datum"] = pd.to_datetime(df_sve["Datum"])
+    # ISPRAVLJENO: Maknuta greška 'Tournament' i 'm_godina :='
     df_mjesec_jednokratni = df_sve[(df_sve["Privremeni_Datum"].dt.year == godina) & (df_sve["Privremeni_Datum"].dt.month == mjesec_broj)]
     df_mjesec_stalni = df_sve[(df_sve["Tip"] == "Prihod") & (df_sve["Stalan"] == True) & (df_sve["Privremeni_Datum"] <= granica_pocetak_mjeseca + pd.offsets.MonthEnd(0))]
     df_mjesec = pd.concat([df_mjesec_jednokratni[df_mjesec_jednokratni["Stalan"] == False], df_mjesec_stalni]).drop_duplicates(subset=["Datum", "Član", "Kategorija", "Iznos (EUR)", "Opis", "Stalan"])
@@ -208,4 +209,3 @@ elif stranica == "Detaljna Statistika":
                 st.info("Nema troškova.")
         with g2:
             st.write("### 🟢 Prihodi ovog mjeseca")
-            df_prihod = df_mjesec[df_mjesec["Tip"] == "Prihod"]
