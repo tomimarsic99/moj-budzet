@@ -83,12 +83,16 @@ if not df_sve.empty:
 # --- FILTRIRANJE PODATAKA ---
 if not df_sve.empty:
     df_sve["Privremeni_Datum"] = pd.to_datetime(df_sve["Datum"])
-    df_mjesec_jednokratni = df_sve[(df_sve["Privremeni_Datum"].dt.year == godina) & (df_sve["Privremeni_Datum"].dt.month == mjesec_broj)]
-    df_mjesec_stalni = df_sve[(df_sve["Tip"] == "Prihod") & (df_sve["Stalan"] == True) & (df_sve["Privremeni_Datum"] <= granica_pocetak_mjeseca + pd.offsets.MonthEnd(0))]
     
-    # POPRAVAK: drop_duplicates sada uklanja duplikate SAMO iz stalnih prihoda, dok troškove i štednju uopće ne dira!
+    # 1. Uzmi sve jednokratne unose iz ovog mjeseca (dopušta apsolutno sve duplikate troškova)
+    df_mjesec_jednokratni = df_sve[(df_sve["Privremeni_Datum"].dt.year == godina) & (df_sve["Privremeni_Datum"].dt.month == mjesec_broj) & (df_sve["Stalan"] == False)]
+    
+    # 2. Uzmi stalne prihode koji vrijede za ovaj mjesec i očisti samo njih od duplanja
+    df_mjesec_stalni = df_sve[(df_sve["Tip"] == "Prihod") & (df_sve["Stalan"] == True) & (df_sve["Privremeni_Datum"] <= granica_pocetak_mjeseca + pd.offsets.MonthEnd(0))]
     df_mjesec_stalni_cist = df_mjesec_stalni.drop_duplicates(subset=["Datum", "Član", "Kategorija", "Iznos (EUR)", "Opis", "Stalan"])
-    df_mjesec = pd.concat([df_mjesec_jednokratni[df_mjesec_jednokratni["Stalan"] == False], df_mjesec_stalni_cist]).drop_duplicates(subset=None, keep='first', inplace=False)
+    
+    # 3. Spoji ih zajedno bez ikakvog dodatnog brisanja duplikata troškova
+    df_mjesec = pd.concat([df_mjesec_jednokratni, df_mjesec_stalni_cist]).reset_index(drop=True)
 else:
     df_mjesec = pd.DataFrame(columns=["Datum", "Član", "Tip", "Kategorija", "Iznos (EUR)", "Opis", "Stalan"])
 
@@ -169,9 +173,8 @@ if stranica == "Unos i Trenutno Stanje":
                 (st.session_state.baza_transakcija["Opis"] == red["Opis"])
             ].index.tolist()
             
-            orig_idx = originalni_idx_lista if originalni_idx_lista else indeks
+            orig_idx = originalni_idx_lista[0] if originalni_idx_lista else indeks
             
-            # Točan i stabilan prikaz stupaca iz prve verzije
             kol_podaci, col_gumb = st.columns([4, 1])
             with kol_podaci:
                 oznaka_stalnog = "🔄 [STALNI] " if red["Stalan"] else ""
@@ -196,7 +199,7 @@ if stranica == "Unos i Trenutno Stanje":
 
 # --- STRANICA 2: DETALJNA STATISTIKA ---
 elif stranica == "Detaljna Statistika":
-    st.subheader(f"📈 Grafički pregled za {mjesec_ime}")
+    st.subheader("📈 Grafički pregled za {mjesec_ime}")
     if df_mjesec.empty:
         st.info(f"Unesite podatke za {mjesec_ime} kako biste vidjeli grafikone.")
     else:
@@ -205,4 +208,3 @@ elif stranica == "Detaljna Statistika":
             st.write("### 🛑 Troškovi ovog mjeseca")
             df_trosak = df_mjesec[df_mjesec["Tip"] == "Trošak"]
             if not df_trosak.empty:
-                po_kat_t = df_trosak.groupby("Kategorija")["Iznos (EUR)"].sum()
