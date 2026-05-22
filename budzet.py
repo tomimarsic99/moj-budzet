@@ -116,7 +116,6 @@ st.write("---")
 if stranica == "Unos i Trenutno Stanje":
     st.subheader("➕ Unesi novi financijski događaj")
    
-    # Odabir tipa je vani kako bi kategorije skočile ODMAH bez čekanja i grešaka
     tip = st.selectbox("Što unosiš?", ["Trošak", "Prihod", "Štednja"])
     
     with st.form("forma_unosa", clear_on_submit=True):
@@ -170,7 +169,7 @@ if stranica == "Unos i Trenutno Stanje":
             
             orig_idx = originalni_idx_lista if originalni_idx_lista else indeks
             
-            kol_podaci, col_gumb = st.columns([4, 1])
+            kol_podaci, col_gumb = st.columns()
             with kol_podaci:
                 oznaka_stalnog = "🔄 [STALNI] " if red["Stalan"] else ""
                 
@@ -209,3 +208,4 @@ elif stranica == "Detaljna Statistika":
                 st.info("Nema troškova.")
         with g2:
             st.write("### 🟢 Prihodi ovog mjeseca")
+            df_prihod = df_mjesec[df_mjesec["Tip"] == "Prihod"]
