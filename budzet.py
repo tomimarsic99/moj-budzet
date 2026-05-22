@@ -3,7 +3,7 @@ import pandas as pd
 import datetime
 import os
 
-st.set_page_config(page_title="Automatski Obiteljski Budžet", layout="wide")
+st.set_page_config(page_title="Obiteljski Budžet", page_icon="📊", layout="wide")
 
 # --- PUTANJA ZA TRAJNO SPREMANJE (Desktop) ---
 PUTANJA_BAZE = os.path.join(os.path.expanduser("~"), "Desktop", "obiteljski_budzet.csv")
