@@ -3,7 +3,7 @@ import pandas as pd
 import datetime
 import os
 
-# ISPRAVLJENO: Kratko ime i ikona koji će se prikazati na mobitelu
+# Kratko ime i ikona koji će se prikazati na mobitelu
 st.set_page_config(page_title="Obiteljski Budžet", page_icon="📊", layout="wide")
 
 # --- PUTANJA ZA INTERNET (Sprema se u istu mapu na cloudu) ---
@@ -84,7 +84,7 @@ if not df_sve.empty:
 # --- FILTRIRANJE PODATAKA ---
 if not df_sve.empty:
     df_sve["Privremeni_Datum"] = pd.to_datetime(df_sve["Datum"])
-    df_mjesec_jednokratni = df_sve[(df_sve["Privremeni_Datum"].dt.year == godina) & (df_sve["Privremeni_Datum"].dt.month == m_godina := mjesec_broj)]
+    df_mjesec_jednokratni = df_sve[(df_sve["Privremeni_Datum"].dt.year == godina) & (df_sve["Privremeni_Datum"].dt.month == mjesec_broj)]
     df_mjesec_stalni = df_sve[(df_sve["Tip"] == "Prihod") & (df_sve["Stalan"] == True) & (df_sve["Privremeni_Datum"] <= granica_pocetak_mjeseca + pd.offsets.MonthEnd(0))]
     df_mjesec = pd.concat([df_mjesec_jednokratni[df_mjesec_jednokratni["Stalan"] == False], df_mjesec_stalni]).drop_duplicates(subset=["Datum", "Član", "Kategorija", "Iznos (EUR)", "Opis", "Stalan"])
 else:
@@ -119,7 +119,6 @@ if stranica == "Unos i Trenutno Stanje":
     # Odabir tipa je vani kako bi kategorije skočile ODMAH bez čekanja i grešaka
     tip = st.selectbox("Što unosiš?", ["Trošak", "Prihod", "Štednja"])
     
-    # POPRAVAK: Svi unosi iznosa i detalja su unutar forme kako internet ne bi bacao grešku dok tipkaš
     with st.form("forma_unosa", clear_on_submit=True):
         col1, col2 = st.columns(2)
         with col1:
@@ -171,7 +170,7 @@ if stranica == "Unos i Trenutno Stanje":
             
             orig_idx = originalni_idx_lista if originalni_idx_lista else indeks
             
-            kol_podaci, col_gumb = st.columns([5, 1])
+            kol_podaci, col_gumb = st.columns([4, 1])
             with kol_podaci:
                 oznaka_stalnog = "🔄 [STALNI] " if red["Stalan"] else ""
                 
@@ -206,3 +205,7 @@ elif stranica == "Detaljna Statistika":
             if not df_trosak.empty:
                 po_kat_t = df_trosak.groupby("Kategorija")["Iznos (EUR)"].sum()
                 st.bar_chart(po_kat_t)
+            else:
+                st.info("Nema troškova.")
+        with g2:
+            st.write("### 🟢 Prihodi ovog mjeseca")
