@@ -3,10 +3,10 @@ import pandas as pd
 import datetime
 import os
 
-# Kratko ime i ikona koji će se prikazati na mobitelu
-st.set_page_config(page_title="Obiteljski Budžet", page_icon="📊", layout="wide")
+# Popravljeno: Kraći naziv i ikona za mobitele
+st.set_page_config(page_title="Obitelj", page_icon="📊", layout="wide")
 
-# --- PUTANJA ZA INTERNET (Sprema se u istu mapu na cloudu) ---
+# --- PUTANJA ZA INTERNET ---
 PUTANJA_BAZE = "obiteljski_budzet.csv"
 
 def ucitaj_podatke():
@@ -125,13 +125,14 @@ if stranica == "Unos i Trenutno Stanje":
             iznos_tekst = st.text_input("Iznos u EUR (npr. 50 ili 12.50):", value="0")
         with col2:
             stalan_prihod = False
+            # Dodane ikone u kategorije
             if tip == "Trošak":
-                kat = st.selectbox("Kategorija troška", ["Hrana", "Režije", "Prijevoz", "Zabava", "Kredit/Stan", "Ostalo"])
+                kat = st.selectbox("Kategorija troška", ["🛒 Hrana", "⚡ Režije", "🚗 Prijevoz", "🎬 Zabava", "🏠 Kredit/Stan", "📦 Ostalo"])
             elif tip == "Prihod":
-                kat = st.selectbox("Kategorija prihoda", ["Plaća 1", "Plaća 2", "Najam", "Dodatno"])
-                stalan_prihod = st.checkbox("🔄 Ovo is stalan mjesečni prihod (ponavlja se)")
+                kat = st.selectbox("Kategorija prihoda", ["💼 Plaća 1", "💼 Plaća 2", "🔑 Najam", "➕ Dodatno"])
+                stalan_prihod = st.checkbox("🔄 Ovo je stalan mjesečni prihod (ponavlja se)")
             else:
-                kat = st.selectbox("Kategorija štednje", ["Hitni fond", "Putovanja", "Dugoročna štednja"])
+                kat = st.selectbox("Kategorija štednje", ["🚨 Hitni fond", "✈️ Putovanja", "📈 Dugoročna štednja"])
                
             datum_unosa = st.date_input("Datum transakcije", datetime.date.today())
             opis = st.text_input("Opis / Napomena")
@@ -169,7 +170,7 @@ if stranica == "Unos i Trenutno Stanje":
             
             orig_idx = originalni_idx_lista if originalni_idx_lista else indeks
             
-            # POPRAVLJENO: Dodan točan omjer stupaca unutar zagrade
+            # Popravljeno: Točan raspored stupaca (4 naprema 1) iz vaše stabilne verzije
             kol_podaci, col_gumb = st.columns([4, 1])
             with kol_podaci:
                 oznaka_stalnog = "🔄 [STALNI] " if red["Stalan"] else ""
@@ -208,4 +209,3 @@ elif stranica == "Detaljna Statistika":
             else:
                 st.info("Nema troškova.")
         with g2:
-            st.write("### 🟢 Prihodi ovog mjeseca")
