@@ -3,10 +3,11 @@ import pandas as pd
 import datetime
 import os
 
+# ISPRAVLJENO: Kratko ime i ikona koji će se prikazati na mobitelu
 st.set_page_config(page_title="Obiteljski Budžet", page_icon="📊", layout="wide")
 
-# --- PUTANJA ZA TRAJNO SPREMANJE (Desktop) ---
-PUTANJA_BAZE = os.path.join(os.path.expanduser("~"), "Desktop", "obiteljski_budzet.csv")
+# --- PUTANJA ZA INTERNET (Sprema se u istu mapu na cloudu) ---
+PUTANJA_BAZE = "obiteljski_budzet.csv"
 
 def ucitaj_podatke():
     if os.path.exists(PUTANJA_BAZE):
@@ -83,7 +84,7 @@ if not df_sve.empty:
 # --- FILTRIRANJE PODATAKA ---
 if not df_sve.empty:
     df_sve["Privremeni_Datum"] = pd.to_datetime(df_sve["Datum"])
-    df_mjesec_jednokratni = df_sve[(df_sve["Privremeni_Datum"].dt.year == godina) & (df_sve["Privremeni_Datum"].dt.month == mjesec_broj)]
+    df_mjesec_jednokratni = df_sve[(df_sve["Privremeni_Datum"].dt.year == godina) & (df_sve["Privremeni_Datum"].dt.month == m_godina := mjesec_broj)]
     df_mjesec_stalni = df_sve[(df_sve["Tip"] == "Prihod") & (df_sve["Stalan"] == True) & (df_sve["Privremeni_Datum"] <= granica_pocetak_mjeseca + pd.offsets.MonthEnd(0))]
     df_mjesec = pd.concat([df_mjesec_jednokratni[df_mjesec_jednokratni["Stalan"] == False], df_mjesec_stalni]).drop_duplicates(subset=["Datum", "Član", "Kategorija", "Iznos (EUR)", "Opis", "Stalan"])
 else:
@@ -115,25 +116,29 @@ st.write("---")
 if stranica == "Unos i Trenutno Stanje":
     st.subheader("➕ Unesi novi financijski događaj")
    
-    col1, col2 = st.columns(2)
-    with col1:
-        tip = st.selectbox("Što unosiš?", ["Trošak", "Prihod", "Štednja"])
-        clan = st.selectbox("Član obitelji", ["Zajednički", "Mama", "Tata", "Kći", "Sin"])
-        iznos_tekst = st.text_input("Iznos u EUR (npr. 50 ili 12.50):", value="0")
-    with col2:
-        stalan_prihod = False
-        if tip == "Trošak":
-            kat = st.selectbox("Kategorija troška", ["Hrana", "Režije", "Prijevoz", "Zabava", "Kredit/Stan", "Ostalo"])
-        elif tip == "Prihod":
-            kat = st.selectbox("Kategorija prihoda", ["Plaća 1", "Plaća 2", "Najam", "Dodatno"])
-            stalan_prihod = st.checkbox("🔄 Ovo je stalan mjesečni prihod (ponavlja se)")
-        else:
-            kat = st.selectbox("Kategorija štednje", ["Hitni fond", "Putovanja", "Dugoročna štednja"])
-           
-        datum_unosa = st.date_input("Datum transakcije", datetime.date.today())
-        opis = st.text_input("Opis / Napomena")
-        
-        potvrda = st.button("Spremi u proračun", type="primary")
+    # Odabir tipa je vani kako bi kategorije skočile ODMAH bez čekanja i grešaka
+    tip = st.selectbox("Što unosiš?", ["Trošak", "Prihod", "Štednja"])
+    
+    # POPRAVAK: Svi unosi iznosa i detalja su unutar forme kako internet ne bi bacao grešku dok tipkaš
+    with st.form("forma_unosa", clear_on_submit=True):
+        col1, col2 = st.columns(2)
+        with col1:
+            clan = st.selectbox("Član obitelji", ["Zajednički", "Mama", "Tata", "Kći", "Sin"])
+            iznos_tekst = st.text_input("Iznos u EUR (npr. 50 ili 12.50):", value="0")
+        with col2:
+            stalan_prihod = False
+            if tip == "Trošak":
+                kat = st.selectbox("Kategorija troška", ["Hrana", "Režije", "Prijevoz", "Zabava", "Kredit/Stan", "Ostalo"])
+            elif tip == "Prihod":
+                kat = st.selectbox("Kategorija prihoda", ["Plaća 1", "Plaća 2", "Najam", "Dodatno"])
+                stalan_prihod = st.checkbox("🔄 Ovo je stalan mjesečni prihod (ponavlja se)")
+            else:
+                kat = st.selectbox("Kategorija štednje", ["Hitni fond", "Putovanja", "Dugoročna štednja"])
+               
+            datum_unosa = st.date_input("Datum transakcije", datetime.date.today())
+            opis = st.text_input("Opis / Napomena")
+            
+        potvrda = st.form_submit_button("Spremi u proračun", type="primary")
 
     if potvrda:
         try:
@@ -166,11 +171,10 @@ if stranica == "Unos i Trenutno Stanje":
             
             orig_idx = originalni_idx_lista if originalni_idx_lista else indeks
             
-            kol_podaci, col_gumb = st.columns([4, 1])
+            kol_podaci, col_gumb = st.columns([5, 1])
             with kol_podaci:
                 oznaka_stalnog = "🔄 [STALNI] " if red["Stalan"] else ""
                 
-                # SVE KAKO JE BILO - DODANE SAMO BOJE:
                 if red["Tip"] == "Prihod":
                     boja_iznosa = f":green[**+{red['Iznos (EUR)']:.2f} €**]"
                 elif red["Tip"] == "Trošak":
@@ -202,10 +206,3 @@ elif stranica == "Detaljna Statistika":
             if not df_trosak.empty:
                 po_kat_t = df_trosak.groupby("Kategorija")["Iznos (EUR)"].sum()
                 st.bar_chart(po_kat_t)
-            else:
-                st.info("Nema troškova.")
-        with g2:
-            st.write("### 🟢 Prihodi ovog mjeseca")
-            df_prihod = df_mjesec[df_mjesec["Tip"] == "Prihod"]
-            if not df_prihod.empty:
-                po_kat_p = df_prihod.groupby("Kategorija")["Iznos (EUR)"].sum()
