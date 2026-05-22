@@ -129,7 +129,7 @@ if stranica == "Unos i Trenutno Stanje":
                 kat = st.selectbox("Kategorija troška", ["Hrana", "Režije", "Prijevoz", "Zabava", "Kredit/Stan", "Ostalo"])
             elif tip == "Prihod":
                 kat = st.selectbox("Kategorija prihoda", ["Plaća 1", "Plaća 2", "Najam", "Dodatno"])
-                stalan_prihod = st.checkbox("🔄 Ovo je stalan mjesečni prihod (ponavlja se)")
+                stalan_prihod = st.checkbox("🔄 Ovo is stalan mjesečni prihod (ponavlja se)")
             else:
                 kat = st.selectbox("Kategorija štednje", ["Hitni fond", "Putovanja", "Dugoročna štednja"])
                
@@ -169,7 +169,8 @@ if stranica == "Unos i Trenutno Stanje":
             
             orig_idx = originalni_idx_lista if originalni_idx_lista else indeks
             
-            kol_podaci, col_gumb = st.columns()
+            # POPRAVLJENO: Dodan točan omjer stupaca unutar zagrade
+            kol_podaci, col_gumb = st.columns([4, 1])
             with kol_podaci:
                 oznaka_stalnog = "🔄 [STALNI] " if red["Stalan"] else ""
                 
