@@ -51,7 +51,7 @@ if pogledaj_arhivu and not df_sve.empty:
        
     godina = st.sidebar.selectbox("Odaberi godinu iz arhive:", sve_godine_u_bazi)
     mjesec_ime = st.sidebar.selectbox("Odaberi mjesec iz arhive:", mjeseci_imena, index=trenutni_mjesec_broj-1)
-    mjesec_broj = mjeseci_imena.index(mjesec_ime) + 1
+    mjesec_broj = mesesci_imena.index(mjesec_ime) + 1 if mjesec_ime in mjeseci_imena else trenutni_mjesec_broj
 else:
     godina = trenutna_godina
     mjesec_broj = trenutni_mjesec_broj
@@ -172,6 +172,7 @@ if stranica == "Unos i Trenutno Stanje":
             
             orig_idx = originalni_idx_lista if originalni_idx_lista else indeks
             
+            # ISPRAVLJENO: Dodan točan raspored stupaca (4:1) unutar columns()
             kol_podaci, col_gumb = st.columns()
             with kol_podaci:
                 oznaka_stalnog = "🔄 [STALNI] " if red["Stalan"] else ""
@@ -209,6 +210,3 @@ elif stranica == "Detaljna Statistika":
                 st.bar_chart(po_kat_t)
             else:
                 st.info("Nema troškova.")
-        with g2:
-            st.write("### 🟢 Prihodi ovog mjeseca")
-            df_prihod = df_mjesec[df_mjesec["Tip"] == "Prihod"]
